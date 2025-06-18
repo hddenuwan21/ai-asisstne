@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WHDR AI Image Generator</title>
+    <style>
+        :root {
+            --primary: rgba(110, 72, 170, 0.8);
+            --secondary: rgba(84, 164, 201, 0.8);
+            --glass: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --glass-highlight: rgba(255, 255, 255, 0.3);
+            --text: rgba(255, 255, 255, 0.9);
+            --text-light: rgba(255, 255, 255, 0.7);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            --backdrop-blur: blur(10px);
+            --transition: all 0.3s ease-out;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+
+
+            min-height: 50vh;
+            padding: 1rem;
+        }
+
+
+
+
+        .brand-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: white;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #fff, #c9d6ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        textarea,
+        select,
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,0.7)'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.8rem center;
+            background-size: 1rem;
+            background-color: transparent;
+            padding-right: 2rem;
+        }
+
+        select option {
+            background: rgba(30, 30, 50, 0.9);
+            color: var(--text);
+            border: none;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+            box-shadow: 0 4px 15px rgba(110, 72, 170, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #000, #222);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:hover::after {
+            content: "Generate Amazing Images";
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            cursor: not-allowed;
+        }
+
+        .loading-animation {
+            display: inline-block;
+            position: relative;
+            width: 24px;
+            height: 24px;
+        }
+
+        .loading-animation div {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: loading 1.2s linear infinite;
+        }
+
+        .loading-animation div:nth-child(1) {
+            animation-delay: 0s;
+            top: 12px;
+            left: 0;
+        }
+
+        .loading-animation div:nth-child(2) {
+            animation-delay: -0.4s;
+            top: 4px;
+            left: 4px;
+        }
+
+        .loading-animation div:nth-child(3) {
+            animation-delay: -0.8s;
+            top: 0;
+            left: 12px;
+        }
+
+        .loading-animation div:nth-child(4) {
+            animation-delay: -0.4s;
+            top: 4px;
+            right: 4px;
+        }
+
+        .loading-animation div:nth-child(5) {
+            animation-delay: -0.8s;
+            top: 12px;
+            right: 0;
+        }
+
+        .loading-animation div:nth-child(6) {
+            animation-delay: -1.2s;
+            bottom: 4px;
+            right: 4px;
+        }
+
+        .loading-animation div:nth-child(7) {
+            animation-delay: -1.6s;
+            bottom: 0;
+            left: 12px;
+        }
+
+        .loading-animation div:nth-child(8) {
+            animation-delay: -1.2s;
+            bottom: 4px;
+            left: 4px;
+        }
+
+        @keyframes loading {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .status {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .status.error {
+            background: rgba(220, 53, 69, 0.15);
+            color: #f87171;
+        }
+
+        .status.success {
+            background: rgba(40, 167, 69, 0.15);
+            color: #4ade80;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-card {
+            background: var(--glass);
+            backdrop-filter: var(--backdrop-blur);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: scale(1.02);
+        }
+
+        .result-img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .result-info {
+            padding: 0.8rem;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-info p {
+            margin: 0;
+            color: var(--text-light);
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .batch-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            gap: 0.5rem;
+        }
+
+        .batch-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .batch-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .share-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .share-box {
+            background: var(--glass);
+            backdrop-filter: var(--backdrop-blur);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .share-btn.facebook {
+            background: #3b5998;
+        }
+
+        .share-btn.twitter {
+            background: #1da1f2;
+        }
+
+        .share-btn.whatsapp {
+            background: #25d366;
+        }
+
+        .share-btn.telegram {
+            background: #0088cc;
+        }
+
+        .share-btn.link {
+            background: var(--primary);
+        }
+
+        .share-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-share {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 100%;
+                padding: 0.5rem;
+            }
+
+            .results {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .result-img {
+                height: 150px;
+            }
+
+            .share-buttons {
+                flex-direction: column;
+            }
+
+            .share-btn {
+                justify-content: center;
+            }
+        }
+
+
+
+
+
+
+
+
+
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            padding-top: 200px;
+            min-height: 100vh;
+        }
+
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--glass);
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            border-bottom: 1px solid var(--glass-border);
+            color: white;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(110, 72, 170, 0.4);
+            position: relative;
+        }
+
+        .avatar img {
+            width: 80%;
+            height: 80%;
+            object-fit: cover;
+        }
+
+        .avatar-pulse {
+            position: absolute;
+            top: 1px;
+            left: 1%;
+            right: 1px;
+            bottom: 1px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: pulse 3s infinite;
+        }
+
+        .avatar-pulse:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            margin-left: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Loading Animation Avatar */
+        .loading-animation {
+            display: inline-block;
+            position: relative;
+            width: 24px;
+            height: 24px;
+        }
+
+        .loading-animation div {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: loading 1.2s linear infinite;
+        }
+
+        .loading-animation div:nth-child(1) {
+            animation-delay: 0s;
+            top: 12px;
+            left: 0;
+        }
+
+        .loading-animation div:nth-child(2) {
+            animation-delay: -0.4s;
+            top: 4px;
+            left: 4px;
+        }
+
+        .loading-animation div:nth-child(3) {
+            animation-delay: -0.8s;
+            top: 0;
+            left: 12px;
+        }
+
+        .loading-animation div:nth-child(4) {
+            animation-delay: -0.4s;
+            top: 4px;
+            right: 4px;
+        }
+
+        .loading-animation div:nth-child(5) {
+            animation-delay: -0.8s;
+            top: 12px;
+            right: 0;
+        }
+
+        .loading-animation div:nth-child(6) {
+            animation-delay: -1.2s;
+            bottom: 4px;
+            right: 4px;
+        }
+
+        .loading-animation div:nth-child(7) {
+            animation-delay: -1.6s;
+            bottom: 0;
+            left: 12px;
+        }
+
+        .loading-animation div:nth-child(8) {
+            animation-delay: -1.2s;
+            bottom: 4px;
+            left: 4px;
+        }
+
+        @keyframes loading {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Mobile Menu Button */
+        .menu-toggle {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            background: var(--glass-highlight);
+        }
+
+        /* Navigation Styles */
+        nav {
+            transition: var(--transition);
+
+
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        nav li {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+        }
+
+        nav a {
+
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 0;
+            display: block;
+            border-radius: 8px;
+            transition: var(--transition);
+            background: var(--glass);
+            margin: 0 5px;
+            border: 1px solid var(--glass-border);
+        }
+
+        nav a:hover,
+        nav a.active {
+            background: var(--glass-highlight);
+            transform: translateY(-5px);
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .logo-container {
+                padding: 0 10px;
+            }
+
+            .menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            nav {
+                max-height: 0;
+                overflow: hidden;
+            }
+
+            nav.active {
+                max-height: 500px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                margin-top: 10px;
+            }
+
+            nav li {
+                margin: 5px 0;
+            }
+
+            nav a {
+                margin: 0;
+            }
+        }
+
+        /* Content Styles */
+        .content {
+            padding: 20px;
+            height: 2000px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="avatar-container">
+                <div class="avatar-pulse"></div>
+                <div class="avatar-pulse"></div>
+                <div class="avatar">
+                    <img src="!.png" alt="AI Girl Avatar">
+                </div>
+            </div>
+            <div class="logo-text">WHDR AI</div>
+            <button class="menu-toggle">☰</button>
+        </div>
+
+        <nav id="main-nav">
+            <ul>
+                <li><a href="aibot.html" class="active">AI Chat</a></li>
+                <li><a href="ChatBot.html">Image Generate</a></li>
+                <li><a href="#">Game</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+
+    <div class="glass-panel">
+        <h1>AI Image Generator</h1>
+
+        <form id="image-form">
+            <div class="form-group">
+
+                <textarea id="image-prompt" placeholder="Describe what you want to generate"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="image-style">Style</label>
+                <select id="image-style">
+                    <option value="realistic" selected>Realistic</option>
+                    <option value="anime">Anime</option>
+                    <option value="cartoon">Cartoon</option>
+                    <option value="fantasy">Fantasy</option>
+                    <option value="3d-render">3D Render</option>
+                    <option value="digital-art">Digital Art</option>
+                </select>
+            </div>
+
+            <button type="button" id="generate-btn" class="btn" onclick="generateImage()">
+                <div id="loading" class="loading-animation" style="display: none;">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <span id="btn-text">Generate Images</span>
+            </button>
+
+            <div id="status" class="status"></div>
+        </form>
+
+        <div id="results" class="results"></div>
+
+        <div id="batch-controls" class="batch-controls" style="display: none;">
+            <button class="batch-btn" onclick="downloadAllImages()">
+                <i class="fas fa-download"></i> Download All
+            </button>
+            <button class="batch-btn" onclick="showShareModal()">
+                <i class="fas fa-share-alt"></i> Share
+            </button>
+            <button class="batch-btn" onclick="clearResults()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-container" class="share-container">
+        <div class="share-box">
+            <button class="close-share" onclick="hideShareModal()">&times;</button>
+            <h3>Share Your Creation</h3>
+            <p>Share your AI-generated images with friends and on social media</p>
+
+            <div class="share-buttons">
+                <a href="#" class="share-btn facebook" onclick="shareOnFacebook()">
+                    <i class="fab fa-facebook-f"></i> Facebook
+                </a>
+                <a href="#" class="share-btn twitter" onclick="shareOnTwitter()">
+                    <i class="fab fa-twitter"></i> Twitter
+                </a>
+                <a href="#" class="share-btn whatsapp" onclick="shareOnWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a href="#" class="share-btn telegram" onclick="shareOnTelegram()">
+                    <i class="fab fa-telegram-plane"></i> Telegram
+                </a>
+                <a href="#" class="share-btn link" onclick="copyShareLink()">
+                    <i class="fas fa-link"></i> Copy Link
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API configuration
+        const API_CONFIG = {
+            BASE_URL: 'https://api.vyro.ai',
+            IMAGE_GENERATION_ENDPOINT: '/v2/image/generations',
+            API_TOKEN: 'Bearer vk-2tBtNerbZx4WLTqvd3BBs2XAZbgyFL8mXFRPt7Y8BN22DVfk'
+        };
+
+        // Store generated images for batch operations
+        let generatedImages = [];
+        let currentPrompt = '';
+        let currentStyle = '';
+
+        // Generate Image function with proper response handling
+        async function generateImage() {
+            const prompt = document.getElementById('image-prompt').value;
+            const style = document.getElementById('image-style').value;
+
+            currentPrompt = prompt;
+            currentStyle = style;
+
+            if (!prompt) {
+                showStatus('Please describe your image', true);
+                return;
+            }
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            document.getElementById('batch-controls').style.display = 'none';
+            showLoading();
+
+            try {
+                // Clear previous images
+                generatedImages = [];
+
+                // Generate 4 images by default (can be adjusted)
+                const imagesToGenerate = 4;
+
+                // Make API call
+                const images = await generateImagesBatch(prompt, style, imagesToGenerate);
+                generatedImages = images;
+
+                if (images.length > 0) {
+                    displayResults(images, prompt, style);
+                    showStatus(`Successfully generated ${images.length} images`);
+                    document.getElementById('batch-controls').style.display = 'flex';
+                } else {
+                    throw new Error('No images were returned from the API');
+                }
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, true);
+                console.error('Generation error:', error);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Generate a batch of images
+        async function generateImagesBatch(prompt, style, count) {
+            const formData = new FormData();
+            formData.append('prompt', prompt);
+            formData.append('style', style);
+            formData.append('image_count', count);
+
+            // Show loading progress
+            showStatus(`Generating ${count} images...`);
+
+            const startTime = performance.now();
+
+            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.IMAGE_GENERATION_ENDPOINT}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': API_CONFIG.API_TOKEN
+                },
+                body: formData
+            });
+
+            const endTime = performance.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(2);
+            console.log(`API call took ${duration} seconds`);
+
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+
+            const contentType = response.headers.get('content-type');
+
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                return data.images || [];
+            } else {
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                return [imageUrl];
+            }
+        }
+
+        // Display results with download buttons
+        function displayResults(imageUrls, prompt, style) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            imageUrls.forEach((imageUrl, index) => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+
+                // Create action buttons
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'result-actions';
+
+                // Download button
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'action-btn';
+                downloadBtn.innerHTML = `
+                    <i class="fas fa-download"></i>
+                `;
+                downloadBtn.title = 'Download';
+                downloadBtn.onclick = () => {
+                    downloadImage(imageUrl, prompt, style, index);
+                };
+
+                // Share button
+                const shareBtn = document.createElement('button');
+                shareBtn.className = 'action-btn';
+                shareBtn.innerHTML = `
+                    <i class="fas fa-share-alt"></i>
+                `;
+                shareBtn.title = 'Share';
+                shareBtn.onclick = () => {
+                    showShareModal(imageUrl);
+                };
+
+                actionsDiv.appendChild(downloadBtn);
+                actionsDiv.appendChild(shareBtn);
+
+                card.innerHTML = `
+                    <img src="${imageUrl}" alt="Generated image ${index + 1}" class="result-img" loading="lazy">
+                    <div class="result-info">
+                        <p>${style}</p>
+                    </div>
+                `;
+
+                // Add action buttons to card
+                card.querySelector('.result-info').appendChild(actionsDiv);
+                resultsDiv.appendChild(card);
+            });
+        }
+
+        // Download a single image
+        function downloadImage(imageUrl, prompt, style, index) {
+            const a = document.createElement('a');
+            a.href = imageUrl;
+
+            // Create a filename from the prompt (first 3 words) and index
+            const promptWords = prompt.split(/\s+/).slice(0, 3).join('-');
+            const filename = `whdr-${promptWords}-${style}-${index + 1}.jpg`
+                .toLowerCase()
+                .replace(/[^a-z0-9-]/g, '');
+
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            showStatus(`Image ${index + 1} downloaded`);
+        }
+
+        // Download all generated images
+        async function downloadAllImages() {
+            if (generatedImages.length === 0) return;
+
+            showStatus(`Downloading ${generatedImages.length} images...`);
+
+            // Add slight delay between downloads to avoid browser blocking
+            for (let i = 0; i < generatedImages.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                downloadImage(
+                    generatedImages[i],
+                    currentPrompt,
+                    currentStyle,
+                    i
+                );
+            }
+
+            showStatus(`All images downloaded successfully`);
+        }
+
+        // Clear all results
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            generatedImages = [];
+            document.getElementById('batch-controls').style.display = 'none';
+            showStatus('Results cleared');
+        }
+
+        // Show share modal
+        function showShareModal(imageUrl = '') {
+            const shareContainer = document.getElementById('share-container');
+            shareContainer.style.display = 'flex';
+
+            // If specific image is provided, use that, otherwise share all
+            if (imageUrl) {
+                // Set up sharing for single image
+                // You can store this temporarily or handle differently
+            } else {
+                // Set up sharing for all generated images
+            }
+        }
+
+        // Hide share modal
+        function hideShareModal() {
+            document.getElementById('share-container').style.display = 'none';
+        }
+
+        // Share on Facebook
+        function shareOnFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+            hideShareModal();
+        }
+
+        // Share on Twitter
+        function shareOnTwitter() {
+            const text = encodeURIComponent(`Check out these AI-generated images I created: "${currentPrompt}"`);
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+            hideShareModal();
+        }
+
+        // Share on WhatsApp
+        function shareOnWhatsApp() {
+            const text = encodeURIComponent(`Check out these AI-generated images I created: "${currentPrompt}" - ${window.location.href}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+            hideShareModal();
+        }
+
+        // Share on Telegram
+        function shareOnTelegram() {
+            const text = encodeURIComponent(`Check out these AI-generated images I created: "${currentPrompt}" - ${window.location.href}`);
+            window.open(`https://t.me/share/url?url=${window.location.href}&text=${text}`, '_blank');
+            hideShareModal();
+        }
+
+        // Copy share link
+        function copyShareLink() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    showStatus('Link copied to clipboard!');
+                    hideShareModal();
+                })
+                .catch(err => {
+                    showStatus('Failed to copy link', true);
+                    console.error('Copy error:', err);
+                });
+        }
+
+        // Show loading indicator
+        function showLoading() {
+            document.getElementById('generate-btn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('btn-text').textContent = 'Generating...';
+        }
+
+        // Hide loading indicator
+        function hideLoading() {
+            document.getElementById('generate-btn').disabled = false;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('btn-text').textContent = 'Generate Images';
+        }
+
+        // Show status message
+        function showStatus(message, isError = false) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = isError ? 'status error' : 'status success';
+            setTimeout(() => {
+                if (statusElement.textContent === message) {
+                    statusElement.textContent = '';
+                    statusElement.className = 'status';
+                }
+            }, 5000);
+        }
+
+
+
+        // Mobile menu toggle functionality
+        const menuToggle = document.querySelector('.menu-toggle');
+        const mainNav = document.getElementById('main-nav');
+
+        menuToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+        });
+
+        // Close menu when clicking on a link (optional)
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    mainNav.classList.remove('active');
+                }
+            });
+        });
+
+        // Close menu when resizing to desktop (optional)
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                mainNav.classList.remove('active');
+            }
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>
